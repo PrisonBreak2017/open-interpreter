@@ -234,3 +234,4 @@ misc/
 # Ignore litellm_uuid.txt
 litellm_uuid.txt
 .vscode/launch.json
+demo_code.py
