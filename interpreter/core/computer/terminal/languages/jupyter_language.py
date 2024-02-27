@@ -14,7 +14,7 @@ from jupyter_client import KernelManager
 
 from ..base_language import BaseLanguage
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 
 class JupyterLanguage(BaseLanguage):
@@ -68,7 +68,8 @@ class JupyterLanguage(BaseLanguage):
         try:
             try:
                 preprocessed_code = self.preprocess_code(code)
-            except:
+            except Exception as e:
+                print(f"exception :{e}")
                 # Any errors produced here are our fault.
                 # Also, for python, you don't need them! It's just for active_line and stuff. Just looks pretty.
                 preprocessed_code = code
@@ -224,6 +225,33 @@ class JupyterLanguage(BaseLanguage):
         return preprocess_python(code)
 
 
+
+
+
+
+
+
+
+
+import re
+def extract_embedded_code(text):
+    """
+    Function to extract code that is included within triple backticks.
+    """
+    # Define a regular expression pattern to find the code between triple backticks
+    code_pattern = r"```(.*?)```"
+
+    # Find all non-overlapping matches and remove leading and trailing whitespaces from each match
+    code_blocks = re.findall(code_pattern, text, re.DOTALL)
+    code_blocks = [code.strip() for code in code_blocks]
+
+    # 检查是否找到了代码块
+    if code_blocks:
+        return code_blocks
+    else:
+        return None
+    
+    
 def preprocess_python(code):
     """
     Add active line markers
@@ -232,6 +260,18 @@ def preprocess_python(code):
 
     code = code.strip()
 
+    extracted_code_blocks = extract_embedded_code(code)
+    # 检查并输出提取的代码
+    if extracted_code_blocks:
+        if len(extracted_code_blocks) > 1:
+            print(f"warning: more than 1, have {len(extracted_code_blocks) } code block")
+
+        print("Extracted code:")
+        code = extracted_code_blocks[0]
+    else:
+        print("No code blocks were found.")
+    print(code)
+    
     # Add print commands that tell us what the active line is
     # but don't do this if any line starts with ! or %
     if not any(line.strip().startswith(("!", "%")) for line in code.split("\n")):

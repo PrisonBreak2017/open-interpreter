@@ -91,7 +91,7 @@ class Llm:
                         if self.interpreter.verbose:
                             print("Removing image message!")
                 # Idea: we could set detail: low for the middle messages, instead of deleting them
-
+        #这里向api 网关发送了 从头开始的消息
         # Convert to OpenAI messages format
         messages = convert_to_openai_messages(
             messages,
@@ -160,17 +160,25 @@ Continuing...
 
             # Reunite system message with messages
             messages = [{"role": "system", "content": system_message}] + messages
-
             pass
 
+        #长消息的问题，只用返回的消息之后的作为消息体
+        sub_list = messages
+        # 逆序遍历列表找到role为'assistant'的最后一个元素
+        for i in range(len(messages) - 1, -1, -1):
+            if messages[i]['role'] == 'assistant':
+                # 将剩余的元素作为子列表赋值
+                sub_list = messages[i + 1:]
+                break
+        messages = [{"role": "system", "content": system_message}] + sub_list
         ## Start forming the request
-
+        
         params = {
             "model": self.model,
-            "messages": messages,
+            "messages": messages, ## here to check the message send
             "stream": True,
         }
-
+        #zhe'l
         # Optional inputs
         if self.api_base:
             params["api_base"] = self.api_base

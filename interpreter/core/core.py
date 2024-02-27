@@ -92,7 +92,9 @@ class OpenInterpreter:
         self.llm = Llm(self) if llm is None else llm
 
         # These are LLM related
-        self.system_message = system_message
+        ##self.system_message =  system_message
+        ##TODO 
+        self.system_message = ""
         self.custom_instructions = custom_instructions
 
         # Computer
