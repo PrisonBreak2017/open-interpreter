@@ -6,18 +6,23 @@ import uvicorn
 from fastapi import Body, FastAPI, Request, Response, WebSocket
 from fastapi.responses import PlainTextResponse, StreamingResponse
 
+import interpreter
 
-def server(interpreter, host="0.0.0.0", port=8000):
+
+def server(interpreter, host="0.0.0.0", port=9999):
     app = FastAPI()
 
-    @app.post("/chat")
-    async def stream_endpoint(request: Request) -> Response:
-        async def event_stream() -> Generator[str, None, None]:
-            data = await request.json()
-            for response in interpreter.chat(message=data["message"], stream=True):
-                yield response
 
-        return Response(event_stream(), media_type="text/event-stream")
+
+    from fastapi.responses import StreamingResponse
+    @app.post("/stream/chat/completions")
+    async def stream_endpoint(request: Request):
+        async def event_stream():
+            data = await request.json() 
+            for response in interpreter.chat(message=data["message"], stream=True):
+                yield response  # 这里可以是 yield f"data: {response}\n\n" 如果你想要遵循 SSE 格式
+
+        return StreamingResponse(event_stream(), media_type="text/event-stream")
 
     # Post endpoint
     # @app.post("/iv0", response_class=PlainTextResponse)
@@ -141,6 +146,8 @@ def server(interpreter, host="0.0.0.0", port=8000):
     print(
         "Opening an `i.protocol` compatible WebSocket endpoint at http://localhost:8000/."
     )
-    print("\nVisit http://localhost:8000/test to test the WebSocket endpoint.\n")
+    print("\nVisit http://localhost:9999/test to test the WebSocket endpoint.\n")
 
     uvicorn.run(app, host=host, port=port)
+
+
