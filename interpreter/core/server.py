@@ -23,6 +23,15 @@ def server(interpreter, host="0.0.0.0", port=9999):
                 yield response  # 这里可以是 yield f"data: {response}\n\n" 如果你想要遵循 SSE 格式
 
         return StreamingResponse(event_stream(), media_type="text/event-stream")
+    
+    from fastapi.responses import JSONResponse
+    @app.post("/chat/completions")
+    async def chat_endpoint(request: Request):
+        data = await request.json()
+        messages = []
+        for response in interpreter.chat(message=data["message"], stream=False):
+            messages.append(response)
+        return JSONResponse(content={"messages": messages})
 
     # Post endpoint
     # @app.post("/iv0", response_class=PlainTextResponse)
